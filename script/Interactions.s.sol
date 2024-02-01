@@ -5,6 +5,7 @@ import {Script, console} from "forge-std/Script.sol";
 import {HelperConfig} from "./HelperConfig.s.sol";
 import {VRFCoordinatorV2Mock} from "@chainlink/contracts/src/v0.8/mocks/VRFCoordinatorV2Mock.sol";
 import {LinkToken} from "../test/mocks/LinkToken.sol";
+import {DevOpsTools} from "foundry-devops/src/DevOpsTools.sol";
 
 contract CreateSubscription is Script {
     function createSubscriptionUsingConfig() internal returns (uint64) {
@@ -61,5 +62,33 @@ contract FundSubscription is Script {
 
     function run() external {
         fundSubscriptionUsingConfig();
+    }
+}
+
+contract AddConsumer is Script {
+
+    function addConsumer(address raffle, address vrfCoordinator, uint64 subId) public {
+        console.log("Adding consumer contract: ", raffle);
+        console.log("Adding consumer using vrfCoordinator: ", vrfCoordinator);
+        console.log("Adding consumer on chainId: ", block.chainid);
+        vm.startBroadcast();
+        VRFCoordinatorV2Mock(vrfCoordinator).addConsumer(subId, raffle);
+        vm.stopBroadcast();
+        console.log("Consumer added");
+    }
+
+    function addConsumerUsingConfig(address raffle) public {
+        HelperConfig helperConfig = new HelperConfig();
+        (, , address vrfCoordinator, , uint64 subId,,) = helperConfig.activeNetworkConfig();
+        addConsumer(raffle, vrfCoordinator, subId);
+        
+    }
+
+    function run() external {
+        address raffle = DevOpsTools.get_most_recent_deployment(
+            "Raffle",
+            block.chainid
+        );
+        addConsumerUsingConfig(raffle);
     }
 }
