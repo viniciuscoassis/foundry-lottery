@@ -39,7 +39,7 @@ contract RaffleTest is Test {
             gasLane,
             subscriptionId,
             callbackGasLimit,
-            link
+            link,
         ) = helperConfig.activeNetworkConfig();
         console.log("Raffle address: %s", address(raffle));
         vm.deal(PLAYER, STARTING_BALANCE);
