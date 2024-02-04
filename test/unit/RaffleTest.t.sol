@@ -211,9 +211,16 @@ contract RaffleTest is Test {
      * fulfillRandomWords
      */
 
+    modifier skipFork() {
+        if (block.chainid != 31337) {
+          return;  
+        }
+        _;
+    }   
+
     function testFulfillRandomWordsCanOnlyBeCalledAfterPerformUpkeep(
         uint256 randomRequestId
-    ) public raffleEnteredAndTimePassed {
+    ) public raffleEnteredAndTimePassed skipFork {
         // Arrange
         vm.expectRevert("nonexistent request");
         VRFCoordinatorV2Mock(vrfCoordinator).fulfillRandomWords(
